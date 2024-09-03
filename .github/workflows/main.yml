@@ -40,3 +40,4 @@ jobs:
 
         # Run the JAR file on the EC2 instance
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "java -jar /home/${EC2_USER}/BankingManagementSystemMongo.jar"
+        EOF
