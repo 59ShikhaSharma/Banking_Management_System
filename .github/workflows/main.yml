@@ -13,26 +13,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH
+    - name: Deploy Docker Images to EC2
+       
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        EC2_HOST: ${{ secrets.EC2_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets['EC2_SSH_PRIVATE_KEY'] }}
+          SSH_HOST: ${{ secrets['EC2_HOST'] }}
+          SSH_USER: ${{ secrets['EC2_USER'] }}
       run: |
-        mkdir -p ~/.ssh
-        # Remove carriage returns and write the SSH key to id_rsa
-        echo "${SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        # Add EC2 host to known_hosts to avoid SSH warnings
-        ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
-
-    - name: Debug SSH Configuration
-      run: |
-        echo "Listing .ssh directory contents:"
-        ls -la ~/.ssh
-        echo "Displaying id_rsa content:"
-        cat ~/.ssh/id_rsa
-        echo "Displaying known_hosts content:"
-        cat ~/.ssh/known_hosts
+          echo "$SSH_PRIVATE_KEY" > shik.pem
+          chmod 600 shik.pem
+          ssh -o StrictHostKeyChecking=no -i shik.pem $SSH_USER@$SSH_HOST << 'EOF'
 
     - name: Deploy JAR to AWS EC2
       env:
