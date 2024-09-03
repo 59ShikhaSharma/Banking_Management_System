@@ -22,7 +22,7 @@ jobs:
       run: |
           echo "$SSH_PRIVATE_KEY" > shik.pem
           chmod 600 shik.pem
-          ssh -o StrictHostKeyChecking=no -i shik.pem $SSH_USER@$SSH_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i shik.pem $SSH_USER@${{ secrets.['EC2_HOST'] }} << 'EOF'
 
     - name: Deploy JAR to AWS EC2
       env:
