@@ -19,20 +19,10 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
       run: |
         mkdir -p ~/.ssh
-        # Write SSH private key to file
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         # Add EC2 host to known_hosts to avoid SSH warnings
-        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-
-    - name: Debug SSH Configuration
-      run: |
-        echo "Listing .ssh directory contents:"
-        ls -la ~/.ssh
-        echo "Displaying id_rsa content:"
-        cat ~/.ssh/id_rsa
-        echo "Displaying known_hosts content:"
-        cat ~/.ssh/known_hosts
+        ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
 
     - name: Deploy JAR to AWS EC2
       env:
