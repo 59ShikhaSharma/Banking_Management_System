@@ -16,7 +16,7 @@ jobs:
     - name: Deploy Docker Images to EC2
        
       env:
-          SSH_PRIVATE_KEY: ${{ secrets['EC2_SSH_PRIVATE_KEY'] }}
+          SSH_PRIVATE_KEY: ${{ secrets['SSH_PRIVATE_KEY'] }}
           SSH_HOST: ${{ secrets['EC2_HOST'] }}
           SSH_USER: ${{ secrets['EC2_USER'] }}
       run: |
