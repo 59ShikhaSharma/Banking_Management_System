@@ -19,16 +19,32 @@ jobs:
         EC2_HOST: ${{ secrets.EC2_HOST }}
       run: |
         mkdir -p ~/.ssh
-        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+        # Remove carriage returns and write the SSH key to id_rsa
+        echo "${SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         # Add EC2 host to known_hosts to avoid SSH warnings
         ssh-keyscan -H ${EC2_HOST} >> ~/.ssh/known_hosts
+
+    - name: Debug SSH Configuration
+      run: |
+        echo "Listing .ssh directory contents:"
+        ls -la ~/.ssh
+        echo "Displaying id_rsa content:"
+        cat ~/.ssh/id_rsa
+        echo "Displaying known_hosts content:"
+        cat ~/.ssh/known_hosts
 
     - name: Deploy JAR to AWS EC2
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
+        # Check if the JAR file exists
+        if [ ! -f ./BankingManagementSystemMongo.jar ]; then
+          echo "JAR file not found!"
+          exit 1
+        fi
+
         # Copy the JAR file to the EC2 instance
         scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
 
