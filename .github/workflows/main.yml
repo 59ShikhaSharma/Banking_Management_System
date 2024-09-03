@@ -25,6 +25,15 @@ jobs:
         # Add EC2 host to known_hosts to avoid SSH warnings
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
+    - name: Debug SSH Configuration
+      run: |
+        echo "Listing .ssh directory contents:"
+        ls -la ~/.ssh
+        echo "Displaying id_rsa content:"
+        cat ~/.ssh/id_rsa
+        echo "Displaying known_hosts content:"
+        cat ~/.ssh/known_hosts
+
     - name: Deploy JAR to AWS EC2
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
