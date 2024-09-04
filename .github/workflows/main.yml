@@ -22,22 +22,21 @@ jobs:
         name: jar-file
         path: BankingManagementSystemMongo.jar  # Correct path to your JAR file
 
-    - name: List uploaded artifacts
+    - name: Save SSH private key
       run: |
-        mkdir -p artifacts
-        tar -xf $GITHUB_WORKSPACE/BankingManagementSystemMongo.jar -C artifacts
-        ls -la artifacts
+        echo "$SSH_PRIVATE_KEY" > id_rsa
+        chmod 600 id_rsa
 
-    - name: Login to EC2 and Deploy JAR
+    - name: Test SSH connection
+      run: |
+        ssh -i id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${EC2_USER}@${EC2_HOST} "echo SSH connection successful"
+
+    - name: Deploy JAR to EC2
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
       run: |
-        # Save the SSH private key to a file
-        echo "$SSH_PRIVATE_KEY" > id_rsa
-        chmod 600 id_rsa
-
         # Check if the JAR file exists locally
         if [ ! -f BankingManagementSystemMongo.jar ]; then
           echo "JAR file not found!"
