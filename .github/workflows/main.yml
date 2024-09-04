@@ -13,6 +13,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Build JAR
+      run: ./mvnw clean package  # Adjust if using a different build tool
+
+    - name: Upload JAR file
+      uses: actions/upload-artifact@v3
+      with:
+        name: jar-file
+        path: target/BankingManagementSystemMongo.jar  # Adjust to your JAR file location
+
     - name: Login to EC2 and Deploy JAR
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -24,19 +33,18 @@ jobs:
         chmod 600 id_rsa
 
         # Check if the JAR file exists locally
-        if [ ! -f ./BankingManagementSystemMongo.jar ]; then
+        if [ ! -f ./target/BankingManagementSystemMongo.jar ]; then
           echo "JAR file not found!"
           exit 1
         fi
         
         # Copy the JAR file to the EC2 instance
-        scp -i id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
+        scp -i id_rsa -o StrictHostKeyChecking=no ./target/BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
         
         # SSH into the EC2 instance to install Java 18 and run the JAR file
         ssh -i id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
           # Install Java 18 if not installed
-          if ! command -v java &> /dev/null || [[ "$(java -version 2>&1 | head -n 1)" != *"18."* ]]
-          then
+          if ! command -v java &> /dev/null || [[ "$(java -version 2>&1 | head -n 1)" != *"18."* ]]; then
               echo "Java 18 not found, installing..."
               sudo apt-get update
               sudo apt-get install -y openjdk-18-jdk
@@ -45,7 +53,7 @@ jobs:
           fi
 
           # Run the JAR file
-          java -jar .${EC2_USER}/BankingManagementSystemMongo.jar
+          java -jar /home/${EC2_USER}/BankingManagementSystemMongo.jar
         EOF
         
         # Clean up the SSH key file
