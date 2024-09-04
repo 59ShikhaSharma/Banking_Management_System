@@ -19,7 +19,7 @@ jobs:
         SSH_HOST: ${{ secrets['EC2_HOST'] }}
         SSH_USER: ${{ secrets['EC2_USER'] }}
       run: |
-        echo "$SSH_PRIVATE_KEY" > id_rsa
+        echo "$SSH_PRIVATE_KEY" 
         chmod 600 id_rsa
         
         # Test SSH connection
