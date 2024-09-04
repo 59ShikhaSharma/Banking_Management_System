@@ -22,7 +22,7 @@ jobs:
         # Save the SSH private key to a file
         echo "$SSH_PRIVATE_KEY" > id_rsa
         chmod 600 id_rsa
-        
+
         # Check if the JAR file exists locally
         if [ ! -f ./BankingManagementSystemMongo.jar ]; then
           echo "JAR file not found!"
@@ -32,8 +32,21 @@ jobs:
         # Copy the JAR file to the EC2 instance
         scp -i id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
         
-        # Run the JAR file on the EC2 instance
-        ssh -i id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "java -jar /home/${EC2_USER}/BankingManagementSystemMongo.jar"
+        # SSH into the EC2 instance to install Java and run the JAR file
+        ssh -i id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
+          # Install Java if not installed
+          if ! command -v java &> /dev/null
+          then
+              echo "Java not found, installing..."
+              sudo apt-get update
+              sudo apt-get install -y openjdk-11-jdk
+          else
+              echo "Java is already installed"
+          fi
+
+          # Run the JAR file
+          java -jar /home/${EC2_USER}/BankingManagementSystemMongo.jar
+        EOF
         
         # Clean up the SSH key file
         rm id_rsa
