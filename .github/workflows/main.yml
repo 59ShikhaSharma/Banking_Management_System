@@ -15,28 +15,23 @@ jobs:
 
     - name: Login to EC2 and Deploy JAR
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
+        SSH_PRIVATE_KEY: ${{ secrets['EC2_SSH_PRIVATE_KEY'] }}
+        SSH_HOST: ${{ secrets['EC2_HOST'] }}
+        SSH_USER: ${{ secrets['EC2_USER'] }}
       run: |
-        # Save the SSH private key to a file
         echo "$SSH_PRIVATE_KEY" > id_rsa
         chmod 600 id_rsa
-
-        # Check if the JAR file exists locally
-        if [ ! -f ./BankingManagementSystemMongo.jar ]; then
-          echo "JAR file not found!"
-          exit 1
-        fi
+        
+        # Test SSH connection
+        ssh -o StrictHostKeyChecking=no -i id_rsa $SSH_USER@$SSH_HOST "echo SSH connection successful"
         
         # Copy the JAR file to the EC2 instance
-        scp -i id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
+        scp -i id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar $SSH_USER@$SSH_HOST:/home/$SSH_USER/
         
         # SSH into the EC2 instance to install Java 18 and run the JAR file
-        ssh -i id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
+        ssh -i id_rsa -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << 'EOF'
           # Install Java 18 if not installed
-          if ! command -v java &> /dev/null || [[ "$(java -version 2>&1 | head -n 1)" != *"18."* ]]
-          then
+          if ! command -v java &> /dev/null || [[ "$(java -version 2>&1 | head -n 1)" != *"18."* ]]; then
               echo "Java 18 not found, installing..."
               sudo apt-get update
               sudo apt-get install -y openjdk-18-jdk
@@ -45,7 +40,7 @@ jobs:
           fi
 
           # Run the JAR file
-          java -jar .${EC2_USER}/BankingManagementSystemMongo.jar
+          java -jar /home/$SSH_USER/BankingManagementSystemMongo.jar
         EOF
         
         # Clean up the SSH key file
