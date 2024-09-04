@@ -45,7 +45,7 @@ jobs:
           fi
 
           # Run the JAR file
-          java -jar /${EC2_USER}/BankingManagementSystemMongo.jar
+          java -jar .${EC2_USER}/BankingManagementSystemMongo.jar
         EOF
         
         # Clean up the SSH key file
