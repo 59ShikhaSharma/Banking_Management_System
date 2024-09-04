@@ -17,7 +17,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: jar-file
-        path: path/to/your/BankingManagementSystemMongo.jar  # Adjust to your JAR file location
+        path: ./BankingManagementSystemMongo.jar  # Adjust to your JAR file location
 
     - name: Login to EC2 and Deploy JAR
       env:
@@ -30,13 +30,13 @@ jobs:
         chmod 600 id_rsa
 
         # Check if the JAR file exists locally
-        if [ ! -f path/to/your/BankingManagementSystemMongo.jar ]; then
+        if [ ! -f ./BankingManagementSystemMongo.jar ]; then
           echo "JAR file not found!"
           exit 1
         fi
         
         # Copy the JAR file to the EC2 instance
-        scp -i id_rsa -o StrictHostKeyChecking=no path/to/your/BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
+        scp -i id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
         
         # SSH into the EC2 instance to install Java 18 and run the JAR file
         ssh -i id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
