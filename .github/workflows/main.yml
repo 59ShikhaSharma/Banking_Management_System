@@ -32,20 +32,20 @@ jobs:
         # Copy the JAR file to the EC2 instance
         scp -i id_rsa -o StrictHostKeyChecking=no ./BankingManagementSystemMongo.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/
         
-        # SSH into the EC2 instance to install Java 17 and run the JAR file
+        # SSH into the EC2 instance to install Java 18 and run the JAR file
         ssh -i id_rsa -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
-          # Install Java 17 if not installed
-          if ! command -v java &> /dev/null || [[ "$(java -version 2>&1 | head -n 1)" != *"17."* ]]
+          # Install Java 18 if not installed
+          if ! command -v java &> /dev/null || [[ "$(java -version 2>&1 | head -n 1)" != *"18."* ]]
           then
-              echo "Java 17 not found, installing..."
+              echo "Java 18 not found, installing..."
               sudo apt-get update
-              sudo apt-get install -y openjdk-17-jdk
+              sudo apt-get install -y openjdk-18-jdk
           else
-              echo "Java 17 is already installed"
+              echo "Java 18 is already installed"
           fi
 
           # Run the JAR file
-          java -jar ./BankingManagementSystemMongo.jar
+          java -jar /${EC2_USER}/BankingManagementSystemMongo.jar
         EOF
         
         # Clean up the SSH key file
